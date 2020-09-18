@@ -9,6 +9,7 @@ using ItemStats.Stat;
 using ItemStats;
 using System.Collections.Generic;
 using ItemStats.ValueFormatters;
+using BepInEx.Configuration;
 
 namespace DurableBears
 {
@@ -19,10 +20,17 @@ namespace DurableBears
 
     public class DurableBears : BaseUnityPlugin
     {
-        public const string modVersion = "0.1.5";
+        public const string modVersion = "0.1.6";
         public const string itemStatsModName = "dev.ontrigger.itemstats";
+
+        private ConfigEntry<int> configInitialArmor;
+        private ConfigEntry<int> configAdditionalArmor;
+
         public void Awake()
         {
+            configInitialArmor = Config.Bind("General Settings", "Initial Armor", 15, "The amount of armor the inital item gives.");
+            configAdditionalArmor = Config.Bind("General Settings", "Additional Armor", 15, "The amount of armor subsequent stacks give.");
+
             RemoveBearDodge();
             AddBearArmor();
             ReplaceBearToolTip();
@@ -52,7 +60,8 @@ namespace DurableBears
                 if(self.inventory)
                 {
                     var itemCount = self.inventory.GetItemCount(ItemIndex.Bear);
-                    self.InvokeMethod("set_armor", self.armor + itemCount * 15);
+                    if(itemCount > 0)
+                        self.InvokeMethod("set_armor", self.armor + configInitialArmor.Value + (itemCount-1) * configAdditionalArmor.Value);
                 }
             };
         }
@@ -60,7 +69,7 @@ namespace DurableBears
         public void ReplaceBearToolTip()
         {
             R2API.LanguageAPI.Add("ITEM_BEAR_PICKUP", "Reduce incoming damage.");
-            R2API.LanguageAPI.Add("ITEM_BEAR_DESC", "<style=cIsHealing>Increase armor</style> by <style=cIsHealing>15</style> <style=cStack>(+15 per stack)</style>.");
+            R2API.LanguageAPI.Add("ITEM_BEAR_DESC", $"<style=cIsHealing>Increase armor</style> by <style=cIsHealing>{configInitialArmor.Value }</style> <style=cStack>(+{configAdditionalArmor.Value} per stack)</style>.");
 
             if(BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(itemStatsModName))
             {
@@ -68,7 +77,7 @@ namespace DurableBears
                 statDef.Stats = new List<ItemStat>
                 {
                     new ItemStat(
-                    (itemCount, ctx) => 15f * itemCount,
+                    (itemCount, ctx) => configInitialArmor.Value + (itemCount-1) * configAdditionalArmor.Value,
                     (value, ctx) => $"Bonus Armor: {value.FormatInt()}"
                     )
                 };
