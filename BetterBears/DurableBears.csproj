@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -25,6 +25,9 @@
     </Reference>
     <Reference Include="BepInEx.Preloader">
       <HintPath>..\..\RoR Files\Libs\BepInEx.Preloader.dll</HintPath>
+    </Reference>
+    <Reference Include="ItemStats">
+      <HintPath>..\..\RoR Files\Libs\ItemStatsMod\ItemStatsMod.dll</HintPath>
     </Reference>
     <Reference Include="MMHOOK_Assembly-CSharp">
       <HintPath>..\..\RoR Files\Libs\MMHOOK_Assembly-CSharp.dll</HintPath>

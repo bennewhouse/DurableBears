@@ -5,21 +5,27 @@ using R2API;
 using R2API.Utils;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using ItemStats.Stat;
+using ItemStats;
+using System.Collections.Generic;
+using ItemStats.ValueFormatters;
 
-
-namespace BetterBears
+namespace DurableBears
 {
 
-    [BepInDependency("com.bepis.r2api")]
-    [BepInPlugin("mod.orare.betterbears", "Better Bears", modVersion)]
+    [BepInPlugin("mod.orare.durablebears", "Durable Bears", modVersion)]
+    [R2APISubmoduleDependency(nameof(R2API.LanguageAPI))]
+    [BepInDependency(itemStatsModName, BepInDependency.DependencyFlags.SoftDependency)]
 
-    public class BetterBears : BaseUnityPlugin
+    public class DurableBears : BaseUnityPlugin
     {
         public const string modVersion = "0.1.5";
+        public const string itemStatsModName = "dev.ontrigger.itemstats";
         public void Awake()
         {
             RemoveBearDodge();
             AddBearArmor();
+            ReplaceBearToolTip();
         }
 
         public void RemoveBearDodge()
@@ -49,6 +55,24 @@ namespace BetterBears
                     self.InvokeMethod("set_armor", self.armor + itemCount * 15);
                 }
             };
+        }
+
+        public void ReplaceBearToolTip()
+        {
+            R2API.LanguageAPI.Add("ITEM_BEAR_PICKUP", "Reduce incoming damage.");
+            R2API.LanguageAPI.Add("ITEM_BEAR_DESC", "<style=cIsHealing>Increase armor</style> by <style=cIsHealing>15</style> <style=cStack>(+15 per stack)</style>.");
+
+            if(BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(itemStatsModName))
+            {
+                ItemStatDef statDef = ItemStatsMod.GetItemStatDef(ItemIndex.Bear);
+                statDef.Stats = new List<ItemStat>
+                {
+                    new ItemStat(
+                    (itemCount, ctx) => 15f * itemCount,
+                    (value, ctx) => $"Bonus Armor: {value.FormatInt()}"
+                    )
+                };
+            }
         }
 
     }
