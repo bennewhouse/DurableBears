@@ -20,7 +20,7 @@ namespace DurableBears
 
     public class DurableBears : BaseUnityPlugin
     {
-        public const string modVersion = "0.1.6";
+        public const string modVersion = "1.0.0";
         public const string itemStatsModName = "dev.ontrigger.itemstats";
 
         private ConfigEntry<int> configInitialArmor;
@@ -83,6 +83,5 @@ namespace DurableBears
                 };
             }
         }
-
     }
 }
