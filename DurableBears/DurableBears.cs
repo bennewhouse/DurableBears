@@ -5,10 +5,7 @@ using R2API;
 using R2API.Utils;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using ItemStats.Stat;
-using ItemStats;
 using System.Collections.Generic;
-using ItemStats.ValueFormatters;
 using BepInEx.Configuration;
 
 namespace DurableBears
@@ -20,11 +17,11 @@ namespace DurableBears
 
     public class DurableBears : BaseUnityPlugin
     {
-        public const string modVersion = "1.0.0";
+        public const string modVersion = "1.0.1";
         public const string itemStatsModName = "dev.ontrigger.itemstats";
 
-        private ConfigEntry<int> configInitialArmor;
-        private ConfigEntry<int> configAdditionalArmor;
+        public static ConfigEntry<int> configInitialArmor;
+        public static ConfigEntry<int> configAdditionalArmor;
 
         public void Awake()
         {
@@ -34,6 +31,8 @@ namespace DurableBears
             RemoveBearDodge();
             AddBearArmor();
             ReplaceBearToolTip();
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(itemStatsModName))
+                ItemStatsModCustomDefs.AddItemStatsModDef();
         }
 
         public void RemoveBearDodge()
@@ -57,11 +56,11 @@ namespace DurableBears
             On.RoR2.CharacterBody.RecalculateStats += (orig, self) =>
             {
                 orig(self);
-                if(self.inventory)
+                if (self.inventory)
                 {
                     var itemCount = self.inventory.GetItemCount(ItemIndex.Bear);
-                    if(itemCount > 0)
-                        self.InvokeMethod("set_armor", self.armor + configInitialArmor.Value + (itemCount-1) * configAdditionalArmor.Value);
+                    if (itemCount > 0)
+                        self.InvokeMethod("set_armor", self.armor + configInitialArmor.Value + (itemCount - 1) * configAdditionalArmor.Value);
                 }
             };
         }
@@ -70,18 +69,6 @@ namespace DurableBears
         {
             R2API.LanguageAPI.Add("ITEM_BEAR_PICKUP", "Reduce incoming damage.");
             R2API.LanguageAPI.Add("ITEM_BEAR_DESC", $"<style=cIsHealing>Increase armor</style> by <style=cIsHealing>{configInitialArmor.Value }</style> <style=cStack>(+{configAdditionalArmor.Value} per stack)</style>.");
-
-            if(BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(itemStatsModName))
-            {
-                ItemStatDef statDef = ItemStatsMod.GetItemStatDef(ItemIndex.Bear);
-                statDef.Stats = new List<ItemStat>
-                {
-                    new ItemStat(
-                    (itemCount, ctx) => configInitialArmor.Value + (itemCount-1) * configAdditionalArmor.Value,
-                    (value, ctx) => $"Bonus Armor: {value.FormatInt()}"
-                    )
-                };
-            }
-        }
+        }   
     }
 }
