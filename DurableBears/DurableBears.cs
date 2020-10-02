@@ -7,6 +7,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System.Collections.Generic;
 using BepInEx.Configuration;
+using System.Reflection;
 
 namespace DurableBears
 {
@@ -17,7 +18,7 @@ namespace DurableBears
 
     public class DurableBears : BaseUnityPlugin
     {
-        public const string modVersion = "1.0.1";
+        public const string modVersion = "1.0.2";
         public const string itemStatsModName = "dev.ontrigger.itemstats";
 
         public static ConfigEntry<int> configInitialArmor;
@@ -60,7 +61,11 @@ namespace DurableBears
                 {
                     var itemCount = self.inventory.GetItemCount(ItemIndex.Bear);
                     if (itemCount > 0)
-                        self.InvokeMethod("set_armor", self.armor + configInitialArmor.Value + (itemCount - 1) * configAdditionalArmor.Value);
+                    {
+                        typeof(CharacterBody)
+                        .GetMethod("set_armor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy | BindingFlags.Instance)
+                        .Invoke(self, new object[] { self.armor + configInitialArmor.Value + (itemCount - 1) * configAdditionalArmor.Value });
+                    }
                 }
             };
         }
