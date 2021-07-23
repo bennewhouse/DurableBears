@@ -9,7 +9,7 @@ namespace DurableBears
     {
         public static void AddItemStatsModDef()
         {
-            ItemStats.ItemStatDef statDef = ItemStats.ItemStatsMod.GetItemStatDef(ItemIndex.Bear);
+            ItemStats.ItemStatDef statDef = ItemStats.ItemStatsMod.GetItemStatDef(RoR2Content.Items.Bear.itemIndex);
             statDef.Stats = new List<ItemStats.Stat.ItemStat>
                 {
                     new ItemStats.Stat.ItemStat(

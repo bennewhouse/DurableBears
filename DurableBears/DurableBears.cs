@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BepInEx;
 using RoR2;
 using R2API;
@@ -18,7 +18,7 @@ namespace DurableBears
 
     public class DurableBears : BaseUnityPlugin
     {
-        public const string modVersion = "1.0.2";
+        public const string modVersion = "1.0.3";
         public const string itemStatsModName = "dev.ontrigger.itemstats";
 
         public static ConfigEntry<int> configInitialArmor;
@@ -33,7 +33,13 @@ namespace DurableBears
             AddBearArmor();
             ReplaceBearToolTip();
             if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(itemStatsModName))
-                ItemStatsModCustomDefs.AddItemStatsModDef();
+            {
+                ItemCatalog.availability.CallWhenAvailable(() =>
+                {
+                    ItemStatsModCustomDefs.AddItemStatsModDef();
+                });
+            }
+
         }
 
         public void RemoveBearDodge()
@@ -59,7 +65,7 @@ namespace DurableBears
                 orig(self);
                 if (self.inventory)
                 {
-                    var itemCount = self.inventory.GetItemCount(ItemIndex.Bear);
+                    var itemCount = self.inventory.GetItemCount(RoR2Content.Items.Bear);
                     if (itemCount > 0)
                     {
                         typeof(CharacterBody)
